@@ -1,0 +1,2 @@
+z:\Mame2LCD\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\WindowsFormsApplication1.exe.config
+z:\Mame2LCD\WindowsFormsApplication1\WindowsFormsApplication1\bin\Debug\SteamGameLauncher.exe.config
