@@ -20,3 +20,17 @@ Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\SteamGameLauncher.exe
 Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\SteamGameLauncher.pdb
 Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\Newtonsoft.Json.dll
 Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\Newtonsoft.Json.xml
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\SteamGameLauncher.exe.config
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.exe
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.pdb
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\SteamGameLauncher.exe
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\SteamGameLauncher.pdb
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\Newtonsoft.Json.dll
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\Newtonsoft.Json.xml
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.csprojResolveAssemblyReference.cache
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\WindowsFormsApplication1.Form1.resources
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.Properties.Resources.resources
+D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.csproj.GenerateResource.Cache
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.dll
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.pdb
+D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.xml

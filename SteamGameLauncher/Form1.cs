@@ -14,9 +14,10 @@ using Newtonsoft.Json;
 namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
-    {
+    {        
         Form popOut = new Form();
         Process mplayer = new Process();
+        SteamAPI api;
         string gameInfo = "";
         string id = "0";
 
@@ -37,6 +38,10 @@ namespace WindowsFormsApplication1
                 this.WindowState = FormWindowState.Minimized;
                 this.ShowInTaskbar = false;
                 RunApplication();
+            }
+            else
+            {
+                
             }
         }
 
@@ -297,5 +302,88 @@ namespace WindowsFormsApplication1
                 catch (Exception ex) { MessageBox.Show("Video Error: " + ex.Message); this.Enabled = true; }                
             }            
         }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string id = "";
+                textBox7.Text = textBox7.Text.ToLower();
+
+                if (textBox7.Text.Contains("profiles"))
+                {
+                    id = textBox7.Text.Split('/')[textBox7.Text.Split('/').Length - 1];
+                }
+                else if (textBox7.Text.Contains("id"))
+                {
+
+                    using (WebClient client = new WebClient())
+                    {
+                        if (!textBox7.Text.Contains("http"))
+                        {
+                            textBox7.Text = "http://" + textBox7.Text;
+                        }
+                        string url = textBox7.Text + "?xml=1";
+
+                        string[] xml = client.DownloadString(url).Split('\n');
+                        foreach (string line in xml)
+                        {
+                            if (line.Contains("steamID64"))
+                            {
+                                id = line.Split('>')[1].Split('<')[0].Trim();
+                            }
+                        }
+                    }
+                }
+
+                if (!String.IsNullOrEmpty(id))
+                {
+                    api = new SteamAPI();
+                    api.Init(id);
+                }
+
+                textBox7.Text = id;
+            }
+            catch { }
+                        
+            BackgroundWorker worker = new BackgroundWorker();
+            worker.DoWork += (_sender, _e) =>
+            {
+                Console.WriteLine("Starting...");
+                foreach (Game game in api.response.games)
+                {
+                    try
+                    {
+                        string apiresult = "";
+
+                        using (WebClient client = new WebClient())
+                        {
+                            apiresult = client.DownloadString("http://store.steampowered.com/api/appdetails?appids=" + game.appid);
+                        }
+
+                        apiresult = apiresult.Replace("{\"" + game.appid + "\"", "{\"game\"").Replace("\"480\"", "\"LowDef\"");
+
+                        SteamGame found = new SteamGame();
+                        found = Newtonsoft.Json.JsonConvert.DeserializeObject<SteamGame>(apiresult);                        
+
+                        game.game_name = found.game.data.name;
+                        Console.WriteLine("Found " + game.game_name + " (" + game.appid + ")");
+                    }
+                    catch (Exception ex) { Console.WriteLine(ex.Message); }
+                    System.Threading.Thread.Sleep(1000);
+                }                
+            };
+
+            worker.RunWorkerCompleted += (_sender, _e) =>
+            {
+                foreach (Game game in api.response.games)
+                {
+                    checkedListBox1.Items.Add(game.appid + "|" + game.game_name);
+                }
+                Console.WriteLine("Done...");
+            };
+
+            worker.RunWorkerAsync();
+        }        
     }
 }

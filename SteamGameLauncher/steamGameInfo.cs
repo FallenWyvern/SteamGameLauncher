@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Net;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
 {
@@ -117,33 +121,33 @@ namespace WindowsFormsApplication1
         public string type { get; set; }
         public string name { get; set; }
         public int steam_appid { get; set; }
-        public int required_age { get; set; }
-        public bool is_free { get; set; }
-        public string controller_support { get; set; }
-        public string detailed_description { get; set; }
-        public string about_the_game { get; set; }
-        public string supported_languages { get; set; }
+        //public int required_age { get; set; }
+        //public bool is_free { get; set; }
+        //public string controller_support { get; set; }
+        //public string detailed_description { get; set; }
+        //public string about_the_game { get; set; }
+        //public string supported_languages { get; set; }
         public string header_image { get; set; }
-        public string website { get; set; }
-        public PcRequirements pc_requirements { get; set; }
-        public List<object> mac_requirements { get; set; }
-        public List<object> linux_requirements { get; set; }
-        public string legal_notice { get; set; }
-        public List<string> developers { get; set; }
-        public List<string> publishers { get; set; }
-        public PriceOverview price_overview { get; set; }
-        public List<int> packages { get; set; }
-        public List<PackageGroup> package_groups { get; set; }
-        public Platforms platforms { get; set; }
-        public List<Category> categories { get; set; }
-        public List<Genre> genres { get; set; }
+        //public string website { get; set; }
+        //public PcRequirements pc_requirements { get; set; }
+        //public List<object> mac_requirements { get; set; }
+        //public List<object> linux_requirements { get; set; }
+        //public string legal_notice { get; set; }
+        //public List<string> developers { get; set; }
+        //public List<string> publishers { get; set; }
+        //public PriceOverview price_overview { get; set; }
+        //public List<int> packages { get; set; }
+        //public List<PackageGroup> package_groups { get; set; }
+        //public Platforms platforms { get; set; }
+        //public List<Category> categories { get; set; }
+        //public List<Genre> genres { get; set; }
         public List<Screenshot> screenshots { get; set; }
         public List<Movie> movies { get; set; }
-        public Recommendations recommendations { get; set; }
-        public Achievements achievements { get; set; }
-        public ReleaseDate release_date { get; set; }
-        public SupportInfo support_info { get; set; }
-        public string background { get; set; }
+        //public Recommendations recommendations { get; set; }
+        //public Achievements achievements { get; set; }
+        //public ReleaseDate release_date { get; set; }
+        //public SupportInfo support_info { get; set; }
+        //public string background { get; set; }
     }
 
     public class SteamGameInfo
@@ -157,4 +161,38 @@ namespace WindowsFormsApplication1
         public SteamGameInfo game { get; set; }
     }
 
+
+    public class Game
+    {
+        public int appid { get; set; }
+        public string game_name { get; set; }
+        public int playtime_forever { get; set; }
+        public int? playtime_2weeks { get; set; }        
+    }
+
+    public class Response
+    {
+        public int game_count { get; set; }
+        public List<Game> games { get; set; }
+    }
+
+    public class SteamAPI
+    {
+        public Response response { get; set; }        
+        string _steamID = "";
+
+        public void Init(string steamID)
+        {            
+            _steamID = steamID;
+            SteamAPI api;
+            
+            using (WebClient client = new WebClient())
+            {                
+                string result = client.DownloadString(new Uri(@"http://download.thegeniusinc.com/steamRequest.php?id=" + steamID));
+                api = Newtonsoft.Json.JsonConvert.DeserializeObject<SteamAPI>(result);                
+            }
+
+            this.response = api.response;                        
+        }        
+    }
 }
