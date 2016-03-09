@@ -350,28 +350,35 @@ namespace WindowsFormsApplication1
             worker.DoWork += (_sender, _e) =>
             {
                 Console.WriteLine("Starting...");
-                foreach (Game game in api.response.games)
+                if (!File.Exists(id + ".prf"))
                 {
-                    try
+                    foreach (Game game in api.response.games)
                     {
-                        string apiresult = "";
-
-                        using (WebClient client = new WebClient())
+                        try
                         {
-                            apiresult = client.DownloadString("http://store.steampowered.com/api/appdetails?appids=" + game.appid);
+                            string apiresult = "";
+
+                            using (WebClient client = new WebClient())
+                            {
+                                apiresult = client.DownloadString("http://store.steampowered.com/api/appdetails?appids=" + game.appid);
+                            }
+
+                            apiresult = apiresult.Replace("{\"" + game.appid + "\"", "{\"game\"").Replace("\"480\"", "\"LowDef\"");
+
+                            SteamGame found = new SteamGame();
+                            found = Newtonsoft.Json.JsonConvert.DeserializeObject<SteamGame>(apiresult);
+
+                            game.game_name = found.game.data.name;
+                            Console.WriteLine("Found " + game.game_name + " (" + game.appid + ")");
                         }
-
-                        apiresult = apiresult.Replace("{\"" + game.appid + "\"", "{\"game\"").Replace("\"480\"", "\"LowDef\"");
-
-                        SteamGame found = new SteamGame();
-                        found = Newtonsoft.Json.JsonConvert.DeserializeObject<SteamGame>(apiresult);                        
-
-                        game.game_name = found.game.data.name;
-                        Console.WriteLine("Found " + game.game_name + " (" + game.appid + ")");
+                        catch (Exception ex) { Console.WriteLine(ex.Message); }
+                        System.Threading.Thread.Sleep(1500);
                     }
-                    catch (Exception ex) { Console.WriteLine(ex.Message); }
-                    System.Threading.Thread.Sleep(1000);
-                }                
+                }
+                else
+                {
+                    api = JsonConvert.DeserializeObject<SteamAPI>(File.ReadAllText(id + ".prf"));
+                }
             };
 
             worker.RunWorkerCompleted += (_sender, _e) =>
@@ -381,6 +388,8 @@ namespace WindowsFormsApplication1
                     checkedListBox1.Items.Add(game.appid + "|" + game.game_name);
                 }
                 Console.WriteLine("Done...");
+
+                File.WriteAllText(@id + ".prf", JsonConvert.SerializeObject(api));
             };
 
             worker.RunWorkerAsync();
