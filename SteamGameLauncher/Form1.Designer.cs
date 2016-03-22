@@ -54,10 +54,11 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.textBox7 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.button8 = new System.Windows.Forms.Button();
             this.checkedListBox1 = new System.Windows.Forms.CheckedListBox();
+            this.button8 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.textBox7 = new System.Windows.Forms.TextBox();
+            this.button9 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
@@ -291,6 +292,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button9);
             this.tabPage2.Controls.Add(this.checkedListBox1);
             this.tabPage2.Controls.Add(this.button8);
             this.tabPage2.Controls.Add(this.label4);
@@ -303,21 +305,14 @@
             this.tabPage2.Text = "Batch";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // textBox7
+            // checkedListBox1
             // 
-            this.textBox7.Location = new System.Drawing.Point(60, 6);
-            this.textBox7.Name = "textBox7";
-            this.textBox7.Size = new System.Drawing.Size(353, 20);
-            this.textBox7.TabIndex = 0;
-            // 
-            // label4
-            // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(6, 9);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(48, 13);
-            this.label4.TabIndex = 1;
-            this.label4.Text = "SteamID";
+            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.checkedListBox1.FormattingEnabled = true;
+            this.checkedListBox1.Location = new System.Drawing.Point(3, 75);
+            this.checkedListBox1.Name = "checkedListBox1";
+            this.checkedListBox1.Size = new System.Drawing.Size(496, 319);
+            this.checkedListBox1.TabIndex = 3;
             // 
             // button8
             // 
@@ -329,14 +324,31 @@
             this.button8.UseVisualStyleBackColor = true;
             this.button8.Click += new System.EventHandler(this.button8_Click);
             // 
-            // checkedListBox1
+            // label4
             // 
-            this.checkedListBox1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.checkedListBox1.FormattingEnabled = true;
-            this.checkedListBox1.Location = new System.Drawing.Point(3, 45);
-            this.checkedListBox1.Name = "checkedListBox1";
-            this.checkedListBox1.Size = new System.Drawing.Size(496, 349);
-            this.checkedListBox1.TabIndex = 3;
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 9);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(48, 13);
+            this.label4.TabIndex = 1;
+            this.label4.Text = "SteamID";
+            // 
+            // textBox7
+            // 
+            this.textBox7.Location = new System.Drawing.Point(60, 6);
+            this.textBox7.Name = "textBox7";
+            this.textBox7.Size = new System.Drawing.Size(353, 20);
+            this.textBox7.TabIndex = 0;
+            // 
+            // button9
+            // 
+            this.button9.Location = new System.Drawing.Point(390, 46);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(104, 23);
+            this.button9.TabIndex = 4;
+            this.button9.Text = "Process Selected";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
             // 
             // Form1
             // 
@@ -405,6 +417,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox textBox7;
         private System.Windows.Forms.CheckedListBox checkedListBox1;
+        private System.Windows.Forms.Button button9;
 
     }
 }

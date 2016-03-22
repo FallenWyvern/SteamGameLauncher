@@ -34,3 +34,6 @@ D:\SteamGameLauncher\SteamGameLauncher\obj\Debug\SteamGameLauncher.csproj.Genera
 D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.dll
 D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.pdb
 D:\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.xml
+Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.dll
+Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.pdb
+Z:\Mame2LCD\SteamGameLauncher\SteamGameLauncher\bin\Debug\protobuf-net.xml

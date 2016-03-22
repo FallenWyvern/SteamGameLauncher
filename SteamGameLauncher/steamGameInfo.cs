@@ -2,13 +2,14 @@
 using System.Net;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
 namespace WindowsFormsApplication1
-{
+{        
     public class PcRequirements
     {
         public string minimum { get; set; }
@@ -159,6 +160,7 @@ namespace WindowsFormsApplication1
     public class SteamGame
     {
         public SteamGameInfo game { get; set; }
+        public string myJSON { get; set; }
     }
 
 
