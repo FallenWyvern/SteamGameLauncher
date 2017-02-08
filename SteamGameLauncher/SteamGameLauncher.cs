@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.IO;
 using System.Net;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+using Microsoft.Win32;
 using System.Windows.Forms;
 using System.Diagnostics;
 using Newtonsoft.Json;
@@ -15,20 +12,33 @@ namespace WindowsFormsApplication1
 {
     public partial class Form1 : Form
     {
+        OpenFileDialog dialog = new OpenFileDialog();
         Form popOut = new Form();
         Process mplayer = new Process();
         SteamAPI api;
+        RegistryKey key;
         string gameInfo = "";
+        string steamPath = "";
         string id = "0";
 
         public Form1()
         {
             InitializeComponent();
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox3.SizeMode = PictureBoxSizeMode.StretchImage;
+            dialog.RestoreDirectory = true;
+            screenshotImage.SizeMode = PictureBoxSizeMode.StretchImage;
+            bannerImage.SizeMode = PictureBoxSizeMode.StretchImage;
             popOut.WindowState = FormWindowState.Maximized;
             popOut.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             popOut.Visible = false;
+            tabControl1.TabPages.RemoveAt(1);
+            findSteamDir();
+        }
+
+        private void findSteamDir()
+        {
+            key = Registry.CurrentUser.OpenSubKey("Software\\Valve\\Steam");
+            steamPath = (string)key.GetValue("SteamPath");
+            Console.WriteLine("Steam Path: " + steamPath);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -37,7 +47,7 @@ namespace WindowsFormsApplication1
             {
                 this.WindowState = FormWindowState.Minimized;
                 this.ShowInTaskbar = false;
-                RunApplication();
+                runApplication();
             }
             else
             {
@@ -45,13 +55,13 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private void RunApplication()
+        private void runApplication()
         {
-            RunSteamGame();
+            runSteamGame();
             Application.Exit();
         }
 
-        private void RunSteamGame()
+        private void runSteamGame()
         {
             string exeName = Environment.GetCommandLineArgs()[1];
             int steamAppID = 0;
@@ -81,7 +91,7 @@ namespace WindowsFormsApplication1
 
             if (Environment.GetCommandLineArgs()[1] == steamAppID.ToString())
             {
-                SteamGame game = FigureGame(steamAppID.ToString());
+                SteamGame game = figureGame(steamAppID.ToString());
                 if (game != null)
                 {
                     string gameName = Util.CleanFileName(game.game.data.name);
@@ -120,21 +130,30 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog dialog = new OpenFileDialog();
+        private void findExe_Click(object sender, EventArgs e)
+        {            
+            if (Directory.Exists(steamPath + "/steamapps/common/"))
+            {
+                dialog.InitialDirectory = steamPath.Replace('/', '\\') + @"\steamapps\common\";
+            }            
+            
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                textBox2.Text = dialog.FileName;
+                exePath.Text = dialog.FileName;
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void readSteamGame_Click(object sender, EventArgs e)
         {
-            GrabGame(textBox1.Text);
+            if (!steamGameURL.Text.Contains("store"))
+            {
+                steamGameURL.Text = "http://store.steampowered.com/app/" + steamGameURL.Text;
+            }
+
+            grabGame(steamGameURL.Text);
         }
 
-        public void GrabGame(string url, bool isJson = false)
+        public void grabGame(string url, bool isJson = false)
         {
             BackgroundWorker grabinfo = new BackgroundWorker();
 
@@ -149,7 +168,7 @@ namespace WindowsFormsApplication1
                         {
                             if (url[url.Length - 1].ToString() == "/")
                             {
-                                url = url.Substring(0, textBox1.Text.Length - 1);
+                                url = url.Substring(0, steamGameURL.Text.Length - 1);
                             }
 
                             id = url.Split('/')[url.Split('/').Length - 1];
@@ -175,38 +194,38 @@ namespace WindowsFormsApplication1
                     game = JsonConvert.DeserializeObject<SteamGame>(gameInfo);
                     game.myJSON = gameInfo;
 
-                    try { textBox6.Text = game.game.data.name; }
+                    try { gameTitle.Text = game.game.data.name; }
                     catch { }
 
-                    listBox1.ClearSelected();
-                    listBox2.ClearSelected();
-                    listBox1.Items.Clear();
-                    listBox2.Items.Clear();
+                    screenshotsList.ClearSelected();
+                    videosList.ClearSelected();
+                    screenshotsList.Items.Clear();
+                    videosList.Items.Clear();
 
                     if (game.game.data.movies != null)
                     {
                         foreach (Movie m in game.game.data.movies)
                         {
-                            if (checkBox1.Checked)
+                            if (hdMovieCheckbox.Checked)
                             {
                                 if (m.webm.max != null)
                                 {
-                                    listBox2.Items.Add(m.webm.max);
+                                    videosList.Items.Add(m.webm.max);
                                 }
                             }
                             else
                             {
                                 if (m.webm.max != null)
                                 {
-                                    listBox2.Items.Add(m.webm.lowdef);
+                                    videosList.Items.Add(m.webm.lowdef);
                                 }
                             }
                         }
                     }
 
-                    if (listBox2.Items.Count > 0)
+                    if (videosList.Items.Count > 0)
                     {
-                        try { listBox2.SetSelected(0, true); StartPreview(false); }
+                        try { videosList.SetSelected(0, true); startPreview(false); }
                         catch (Exception _ex) { Console.WriteLine("Error adding movies: " + _ex.Message); }
                     }
 
@@ -216,14 +235,14 @@ namespace WindowsFormsApplication1
                         {
                             if (s.path_full != null)
                             {
-                                listBox1.Items.Add(s.path_full);
+                                screenshotsList.Items.Add(s.path_full);
                             }
                         }
                     }
 
-                    if (listBox1.Items.Count > 0)
+                    if (screenshotsList.Items.Count > 0)
                     {
-                        try { listBox1.SetSelected(0, true); StartPreview(true); }
+                        try { screenshotsList.SetSelected(0, true); startPreview(true); }
                         catch (Exception _ex) { Console.WriteLine("Error adding pictures: " + _ex.Message); }
                     }
 
@@ -231,7 +250,7 @@ namespace WindowsFormsApplication1
                     {
                         try
                         {
-                            pictureBox3.ImageLocation = game.game.data.header_image;
+                            bannerImage.ImageLocation = game.game.data.header_image;
                         }
                         catch { }
                     }
@@ -242,17 +261,17 @@ namespace WindowsFormsApplication1
             grabinfo.RunWorkerAsync();
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void pickScreenshotDirectory_Click(object sender, EventArgs e)
         {
-            textBox3.Text = PickFolder();
+            snapDirectory.Text = pickFolder();
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void pickVideoDirectory_Click(object sender, EventArgs e)
         {
-            textBox4.Text = PickFolder();
+            videoDirectory.Text = pickFolder();
         }
 
-        private string PickFolder()
+        private string pickFolder()
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
             if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -263,21 +282,21 @@ namespace WindowsFormsApplication1
             return "";
         }
 
-        private void listBox1_Click(object sender, EventArgs e)
+        private void selectScreenshot_Click(object sender, EventArgs e)
         {
-            StartPreview(true);
+            startPreview(true);
         }
 
-        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
+        private void selectVideo_Click(object sender, EventArgs e)
         {
-            StartPreview(false);
+            startPreview(false);
         }
 
-        private void StartPreview(bool isImage)
+        private void startPreview(bool isImage)
         {
             if (isImage)
             {
-                pictureBox1.ImageLocation = listBox1.SelectedItem.ToString();
+                screenshotImage.ImageLocation = screenshotsList.SelectedItem.ToString();
             }
             else
             {
@@ -291,7 +310,7 @@ namespace WindowsFormsApplication1
                 }
 
 
-                if (listBox2.SelectedItem != null)
+                if (videosList.SelectedItem != null)
                 {
                     try
                     {
@@ -300,7 +319,7 @@ namespace WindowsFormsApplication1
                         mplayer.StartInfo.UseShellExecute = false;
                         mplayer.StartInfo.RedirectStandardInput = true;
                         mplayer.StartInfo.RedirectStandardOutput = true;
-                        mplayer.StartInfo.Arguments = "-quiet -volume 0 -slave -fs -cache 8192 -wid " + pictureBox2.Handle + " " + listBox2.SelectedItem.ToString().Replace(@"\", @"");
+                        mplayer.StartInfo.Arguments = "-quiet -volume 0 -slave -vo direct3d -fs -cache 8192 -wid " + videoPreview.Handle + " " + videosList.SelectedItem.ToString().Replace(@"\", @"");
                         mplayer.Start();
                     }
                     catch (Exception ex) { MessageBox.Show("Error playing video: " + ex.Message); }
@@ -308,39 +327,36 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            PictureBox proxy = (PictureBox)sender;
+        private void popOutVideoPreview_Click(object sender, EventArgs e)
+        {            
             if (popOut.Visible == false)
-            {
+            {                
+                popOut.Controls.Add(videoPreview);
                 popOut.Visible = true;
                 popOut.Show();
-                popOut.BringToFront();
-                popOut.Controls.Add(proxy);
-                proxy.Dock = DockStyle.Fill;
+                popOut.BringToFront();                               
             }
             else
-            {
-                popOut.Visible = false;
+            {                
                 popOut.Hide();
                 popOut.SendToBack();
-                proxy.Dock = DockStyle.None;
-                this.Controls.Add(proxy);
+                popOut.Visible = false;
+                panel1.Controls.Add(videoPreview);                
             }
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void stopVideoPlayback_Click(object sender, EventArgs e)
         {
             try { mplayer.Kill(); }
             catch { }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void createGameFile_Click(object sender, EventArgs e)
         {
-            GetMedia(textBox6.Text, textBox2.Text, id, textBox5.Text, textBox3.Text, textBox4.Text, true);
+            getMedia(gameTitle.Text, exePath.Text, id, titleDirectory.Text, snapDirectory.Text, videoDirectory.Text, true);
         }
 
-        private void GetMedia(string gameTitle, string exeName, string gameAppID, string titleDir, string snapsDir, string videoDir, bool showError)
+        private void getMedia(string gameTitle, string exeName, string gameAppID, string titleDir, string snapsDir, string videoDir, bool showError)
         {
             string filename = @".\games\" + gameTitle;
             filename = filename.Replace(":", "");
@@ -350,13 +366,13 @@ namespace WindowsFormsApplication1
 
             if (!String.IsNullOrEmpty(titleDir))
             {
-                try { pictureBox3.Image.Save(titleDir + @"\" + filename + ".jpg"); }
+                try { bannerImage.Image.Save(titleDir + @"\" + filename + ".jpg"); }
                 catch (Exception ex) { if (showError) { MessageBox.Show("Title Error: " + ex.Message); Console.WriteLine("Title: " + titleDir + @"\" + filename + ".jpg"); } }
             }
 
             if (!String.IsNullOrEmpty(snapsDir))
             {
-                try { pictureBox1.Image.Save(snapsDir + @"\" + filename + ".jpg"); }
+                try { screenshotImage.Image.Save(snapsDir + @"\" + filename + ".jpg"); }
                 catch (Exception ex) { if (showError) { MessageBox.Show("Snaps Error: " + ex.Message); Console.WriteLine("Snap: " + snapsDir + @"\" + filename + ".jpg"); } }
             }
 
@@ -370,7 +386,7 @@ namespace WindowsFormsApplication1
                     mplayer.StartInfo.UseShellExecute = false;
                     mplayer.StartInfo.RedirectStandardInput = true;
                     mplayer.StartInfo.RedirectStandardOutput = true;
-                    mplayer.StartInfo.Arguments = "-quiet -cache 8192 " + listBox2.SelectedItem.ToString().Replace(@"\", @"") + " -dumpstream -dumpfile " + videoDir + @"\temp.mp4";
+                    mplayer.StartInfo.Arguments = "-quiet -cache 8192 " + videosList.SelectedItem.ToString().Replace(@"\", @"") + " -dumpstream -dumpfile " + videoDir + @"\temp.mp4";
                     mplayer.Start();
                     mplayer.WaitForExit();
 
@@ -385,7 +401,7 @@ namespace WindowsFormsApplication1
             }
         }
 
-        private void button8_Click(object sender, EventArgs e)
+        private void grabAllProfileGames_Click(object sender, EventArgs e)
         {
             int stop = 0;
             try
@@ -441,7 +457,7 @@ namespace WindowsFormsApplication1
                     allGameJSON.Clear();
                     foreach (Game game in api.response.games)
                     {
-                        FigureGame(game);
+                        figureGame(game);
                         stop++;
                         if (stop == 5)
                         {
@@ -455,7 +471,7 @@ namespace WindowsFormsApplication1
                     allGameJSON.Clear();
                     foreach (Game game in api.response.games)
                     {
-                        FigureGame(game);
+                        figureGame(game);
                         stop++;
                         if (stop == 5)
                         {
@@ -481,7 +497,7 @@ namespace WindowsFormsApplication1
         }
 
         static List<SteamGame> allGameJSON = new List<SteamGame>();
-        private static void FigureGame(Game game)
+        private static void figureGame(Game game)
         {
             try
             {
@@ -502,11 +518,11 @@ namespace WindowsFormsApplication1
                 game.game_name = found.game.data.name;
                 Console.WriteLine("Found " + game.game_name + " (" + game.appid + ")");
             }
-            catch (Exception ex) { Console.WriteLine(ex.Message); System.Threading.Thread.Sleep(1500); Console.WriteLine("Retry " + game.appid); FigureGame(game); }
+            catch (Exception ex) { Console.WriteLine(ex.Message); System.Threading.Thread.Sleep(1500); Console.WriteLine("Retry " + game.appid); figureGame(game); }
             System.Threading.Thread.Sleep(1500);
         }
 
-        private static SteamGame FigureGame(string game)
+        private static SteamGame figureGame(string game)
         {
             try
             {
@@ -526,11 +542,11 @@ namespace WindowsFormsApplication1
                 Console.WriteLine("Found " + found.game.data.name + " (" + game + ")");
                 return found;
             }
-            catch (Exception ex) { Console.WriteLine(ex.Message); System.Threading.Thread.Sleep(1500); Console.WriteLine("Retry " + game); FigureGame(game); }
+            catch (Exception ex) { Console.WriteLine(ex.Message); System.Threading.Thread.Sleep(1500); Console.WriteLine("Retry " + game); figureGame(game); }
             return null;
         }
 
-        private void button9_Click(object sender, EventArgs e)
+        private void processProfile_Click(object sender, EventArgs e)
         {
             for (int i = 0; i < checkedListBox1.Items.Count; i++)
             {
@@ -543,11 +559,11 @@ namespace WindowsFormsApplication1
                             Console.WriteLine("Processing : " + game.game.data.name);
                             id = game.game.data.steam_appid.ToString();
 
-                            GrabGame(game.myJSON, true);
+                            grabGame(game.myJSON, true);
                             
                             string filename = @".\games\" + game.game.data.name.Replace(":", "");
 
-                            if (textBox4.Text != "")
+                            if (videoDirectory.Text != "")
                             {
                                 try
                                 {
@@ -556,28 +572,33 @@ namespace WindowsFormsApplication1
                                     mplayer.StartInfo.UseShellExecute = false;
                                     mplayer.StartInfo.RedirectStandardInput = true;
                                     mplayer.StartInfo.RedirectStandardOutput = true;
-                                    mplayer.StartInfo.Arguments = "-quiet -cache 8192 " + game.game.data.movies[0].webm.max.Replace(@"\", @"") + " -dumpstream -dumpfile " + textBox4.Text + @"\temp.mp4";
+                                    mplayer.StartInfo.Arguments = "-quiet -cache 8192 " + game.game.data.movies[0].webm.max.Replace(@"\", @"") + " -dumpstream -dumpfile " + videoDirectory.Text + @"\temp.mp4";
                                     mplayer.Start();
                                     mplayer.WaitForExit();
 
-                                    if (File.Exists(textBox4.Text + @"\temp.mp4"))
+                                    if (File.Exists(videoDirectory.Text + @"\temp.mp4"))
                                     {
-                                        File.Move(textBox4.Text + @"\temp.mp4", textBox4.Text + @"\" + filename + ".mp4");
+                                        File.Move(videoDirectory.Text + @"\temp.mp4", videoDirectory.Text + @"\" + filename + ".mp4");
                                     }
                                 }
                                 catch { }
                             }                            
 
-                            pictureBox3.ImageLocation = game.game.data.header_image;
-                            pictureBox1.ImageLocation = game.game.data.screenshots[0].path_full;
+                            bannerImage.ImageLocation = game.game.data.header_image;
+                            screenshotImage.ImageLocation = game.game.data.screenshots[0].path_full;
                             
 
-                            pictureBox3.Image.Save(textBox5.Text + @"\" + filename + ".jpg");
-                            pictureBox1.Image.Save(textBox3.Text + @"\" + filename + ".jpg");
+                            bannerImage.Image.Save(titleDirectory.Text + @"\" + filename + ".jpg");
+                            screenshotImage.Image.Save(snapDirectory.Text + @"\" + filename + ".jpg");
                         }
                     }
                 }
             }
+        }
+
+        private void pickBannerDirectory_Click(object sender, EventArgs e)
+        {
+            titleDirectory.Text = pickFolder();
         }
     }
 }
