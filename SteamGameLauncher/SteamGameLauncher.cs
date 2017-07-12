@@ -18,6 +18,7 @@ namespace WindowsFormsApplication1
         SteamAPI api;
         RegistryKey key;
         string gameInfo = "";
+        string clicked = "";
         string steamPath = "";
         string id = "0";
 
@@ -145,6 +146,8 @@ namespace WindowsFormsApplication1
 
         private void readSteamGame_Click(object sender, EventArgs e)
         {
+            exePath.Text = "";            
+
             if (!steamGameURL.Text.Contains("store"))
             {
                 steamGameURL.Text = "http://store.steampowered.com/app/" + steamGameURL.Text;
@@ -196,6 +199,84 @@ namespace WindowsFormsApplication1
 
                     try { gameTitle.Text = game.game.data.name; }
                     catch { }
+
+                    try
+                    {
+                        Console.WriteLine(steamPath + @"\steamapps\common\" + game.game.data.name);
+                        string correctName = "";
+
+                        if (Directory.Exists(steamPath + @"\steamapps\common\" + game.game.data.name + @"\"))
+                        {
+                            exePath.Text = ((steamPath + @"\steamapps\common\" + game.game.data.name + @"\"));
+                            correctName = game.game.data.name;
+                        }
+                        string temp = game.game.data.name.Replace("- ", "");
+                        if (Directory.Exists(steamPath + @"\steamapps\common\" + temp + @"\"))
+                        {
+                            exePath.Text = ((steamPath + @"\steamapps\common\" + temp + @"\"));
+                            correctName = temp;
+                        }
+
+                        temp = temp.Replace(" ", "");
+                        if (Directory.Exists(steamPath + @"\steamapps\common\" + temp + @"\"))
+                        {
+                            exePath.Text = ((steamPath + @"\steamapps\common\" + temp + @"\"));
+                            correctName = temp;
+                        }
+
+
+                        if (correctName.Length > 0)
+                        {
+                            List<string> exeFiles = new List<string>();
+                            foreach (string file in Directory.GetFiles(exePath.Text))
+                            {
+                                if (file.Contains(".exe"))
+                                {
+                                    Console.WriteLine(file);
+                                    exeFiles.Add(file);
+                                }
+                            }
+
+                            Console.WriteLine(exeFiles.Count);
+                            if (exeFiles.Count == 1)
+                            {
+                                exePath.Text = exeFiles[0];
+                            }
+                            else
+                            {
+                                if (exeFiles.Count != 0)
+                                {
+                                    for (int i = 0; i < exeFiles.Count; i++)
+                                    {
+                                        exeFiles[i] = exeFiles[i].Replace(steamPath + @"\steamapps\common\" + correctName, "");
+                                    }
+
+                                    SteamGameLauncher.ExeSelect selectEXE = new SteamGameLauncher.ExeSelect();
+                                    selectEXE.Show();
+                                    selectEXE.comboBox1.Items.AddRange(exeFiles.ToArray());
+
+                                    selectEXE.FormClosed += (sender, e) =>
+                                    {
+                                        exePath.Text = steamPath + @"\steamapps\common\" + correctName + selectEXE.comboBox1.Text;
+                                    };
+                                }
+                                else
+                                {
+                                    exePath.Text = steamPath + @"\steamapps\common\";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            DialogResult result = MessageBox.Show("Title not found, run Steam command to install game?", "Install Game?", MessageBoxButtons.YesNo);
+                            if (result == DialogResult.Yes)
+                            {
+                                Process.Start("steam://install/" + game.game.data.steam_appid);
+                            }
+                        }
+                    } 
+                    catch { }
+
 
                     screenshotsList.ClearSelected();
                     videosList.ClearSelected();
@@ -330,7 +411,7 @@ namespace WindowsFormsApplication1
         private void popOutVideoPreview_Click(object sender, EventArgs e)
         {            
             if (popOut.Visible == false)
-            {                
+            {
                 popOut.Controls.Add(videoPreview);
                 popOut.Visible = true;
                 popOut.Show();
@@ -342,6 +423,24 @@ namespace WindowsFormsApplication1
                 popOut.SendToBack();
                 popOut.Visible = false;
                 panel1.Controls.Add(videoPreview);                
+            }            
+        }
+
+        private void popOutImagePreview_Click(object sender, EventArgs e)
+        {
+            if (popOut.Visible == false)
+            {
+                popOut.Controls.Add(screenshotImage);
+                popOut.Visible = true;
+                popOut.Show();
+                popOut.BringToFront();
+            }
+            else
+            {
+                popOut.Hide();
+                popOut.SendToBack();
+                popOut.Visible = false;
+                panel2.Controls.Add(screenshotImage);
             }
         }
 
@@ -369,15 +468,27 @@ namespace WindowsFormsApplication1
                 try { bannerImage.Image.Save(titleDir + @"\" + filename + ".jpg"); }
                 catch (Exception ex) { if (showError) { MessageBox.Show("Title Error: " + ex.Message); Console.WriteLine("Title: " + titleDir + @"\" + filename + ".jpg"); } }
             }
+            else
+            {
+                try { bannerImage.Image.Save(@".\games\" + filename + "-title.jpg"); }
+                catch { }
+            }
 
             if (!String.IsNullOrEmpty(snapsDir))
             {
                 try { screenshotImage.Image.Save(snapsDir + @"\" + filename + ".jpg"); }
                 catch (Exception ex) { if (showError) { MessageBox.Show("Snaps Error: " + ex.Message); Console.WriteLine("Snap: " + snapsDir + @"\" + filename + ".jpg"); } }
             }
-
-            if (!String.IsNullOrEmpty(videoDir))
+            else
             {
+                try { screenshotImage.Image.Save(@".\games\" + filename + "-snap.jpg"); }
+                catch { }
+            }
+
+            if (String.IsNullOrEmpty(videoDir))
+            {
+                videoDir = @".\games\";
+            }
                 try
                 {
                     this.Enabled = false;
@@ -394,11 +505,10 @@ namespace WindowsFormsApplication1
                     {
                         File.Move(videoDir + @"\temp.mp4", videoDir + @"\" + filename + ".mp4");
                     }
-
+                    while (!mplayer.HasExited) { System.Threading.Thread.Sleep(500); }
                     this.Enabled = true;
                 }
-                catch (Exception ex) { if (showError) { MessageBox.Show("Video Error: " + ex.Message); Console.WriteLine("Video: " + snapsDir + @"\" + filename + ".mp4"); this.Enabled = true; } }
-            }
+                catch (Exception ex) { if (showError) { MessageBox.Show("Video Error: " + ex.Message); Console.WriteLine("Video: " + snapsDir + @"\" + filename + ".mp4"); this.Enabled = true; } }            
         }
 
         private void grabAllProfileGames_Click(object sender, EventArgs e)

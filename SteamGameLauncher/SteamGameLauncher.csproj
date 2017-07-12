@@ -72,6 +72,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExeSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExeSelect.Designer.cs">
+      <DependentUpon>ExeSelect.cs</DependentUpon>
+    </Compile>
     <Compile Include="SteamGameLauncher.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -82,6 +88,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="steamGameInfo.cs" />
     <Compile Include="Util.cs" />
+    <EmbeddedResource Include="ExeSelect.resx">
+      <DependentUpon>ExeSelect.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="SteamGameLauncher.resx">
       <DependentUpon>SteamGameLauncher.cs</DependentUpon>
     </EmbeddedResource>

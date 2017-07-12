@@ -60,6 +60,7 @@
             this.grabProfileGames = new System.Windows.Forms.Button();
             this.label4 = new System.Windows.Forms.Label();
             this.textBox7 = new System.Windows.Forms.TextBox();
+            this.panel2 = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.screenshotImage)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.videoPreview)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bannerImage)).BeginInit();
@@ -67,6 +68,7 @@
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // steamGameURL
@@ -81,9 +83,9 @@
             this.steamGameURLLabel.AutoSize = true;
             this.steamGameURLLabel.Location = new System.Drawing.Point(12, 6);
             this.steamGameURLLabel.Name = "steamGameURLLabel";
-            this.steamGameURLLabel.Size = new System.Drawing.Size(93, 13);
+            this.steamGameURLLabel.Size = new System.Drawing.Size(134, 13);
             this.steamGameURLLabel.TabIndex = 1;
-            this.steamGameURLLabel.Text = "Steam Game URL";
+            this.steamGameURLLabel.Text = "Steam Game URL / AppID";
             // 
             // loadEXE
             // 
@@ -176,12 +178,14 @@
             // 
             // screenshotImage
             // 
-            this.screenshotImage.Location = new System.Drawing.Point(289, 89);
+            this.screenshotImage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.screenshotImage.Location = new System.Drawing.Point(0, 0);
             this.screenshotImage.Name = "screenshotImage";
             this.screenshotImage.Size = new System.Drawing.Size(200, 131);
             this.screenshotImage.TabIndex = 12;
             this.screenshotImage.TabStop = false;
-            this.screenshotImage.Click += new System.EventHandler(this.popOutVideoPreview_Click);
+            this.screenshotImage.Tag = "image";
+            this.screenshotImage.Click += new System.EventHandler(this.popOutImagePreview_Click);
             // 
             // label2
             // 
@@ -200,6 +204,7 @@
             this.videoPreview.Size = new System.Drawing.Size(200, 108);
             this.videoPreview.TabIndex = 14;
             this.videoPreview.TabStop = false;
+            this.videoPreview.Tag = "video";
             this.videoPreview.Click += new System.EventHandler(this.popOutVideoPreview_Click);
             // 
             // bannerImage
@@ -276,12 +281,12 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.panel2);
             this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.createGameButton);
             this.tabPage1.Controls.Add(this.screenshotsList);
             this.tabPage1.Controls.Add(this.videosList);
-            this.tabPage1.Controls.Add(this.screenshotImage);
             this.tabPage1.Controls.Add(this.hdMovieCheckbox);
             this.tabPage1.Controls.Add(this.stopVideoPlayback);
             this.tabPage1.Controls.Add(this.bannerImage);
@@ -361,6 +366,14 @@
             this.textBox7.Size = new System.Drawing.Size(353, 20);
             this.textBox7.TabIndex = 0;
             // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.screenshotImage);
+            this.panel2.Location = new System.Drawing.Point(289, 89);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(200, 131);
+            this.panel2.TabIndex = 23;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -393,6 +406,7 @@
             this.panel1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -431,6 +445,7 @@
         private System.Windows.Forms.CheckedListBox checkedListBox1;
         private System.Windows.Forms.Button processProfile;
         private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Panel panel2;
     }
 }
 
